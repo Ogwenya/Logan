@@ -1,7 +1,10 @@
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode},
+    terminal::{
+        Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode,
+        enable_raw_mode,
+    },
 };
 use ratatui::{Terminal, backend::CrosstermBackend};
 
@@ -23,7 +26,12 @@ mod tui;
 fn main() -> Result<(), io::Error> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
-    execute!(stdout, EnableMouseCapture);
+    let _ = execute!(
+        stdout,
+        EnterAlternateScreen,
+        EnableMouseCapture,
+        Clear(ClearType::All)
+    );
 
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
@@ -57,7 +65,11 @@ fn main() -> Result<(), io::Error> {
     }
 
     disable_raw_mode()?;
-    execute!(terminal.backend_mut(), DisableMouseCapture)?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
     terminal.show_cursor()?;
 
     Ok(())
