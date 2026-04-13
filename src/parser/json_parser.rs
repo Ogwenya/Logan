@@ -6,11 +6,10 @@ pub struct JsonParser;
 
 impl LogParser for JsonParser {
     fn parse(&self, line: &str) -> Option<LogEntry> {
-        let value: serde_json::Value = serde_json::from_str(line).ok?;
-
+        let value: serde_json::Value = serde_json::from_str(line).ok()?;
         let obj = value.as_object()?;
 
-        some(LogEntry {
+        Some(LogEntry {
             timestamp: obj.get("timestamp")?.as_str().map(String::from),
             level: obj.get("level").and_then(|v| v.as_str()).map(parse_level),
             message: obj.get("message")?.as_str()?.to_string(),
@@ -26,7 +25,7 @@ impl LogParser for JsonParser {
     }
 }
 
-fn parse_level(level: &str) {
+fn parse_level(level: &str) -> LogLevel {
     match level.to_lowercase().as_str() {
         "trace" => LogLevel::Trace,
         "debug" => LogLevel::Debug,
