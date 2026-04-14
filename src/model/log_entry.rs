@@ -33,3 +33,16 @@ pub struct LogEntry {
     #[allow(dead_code)]
     pub fields: HashMap<String, String>,
 }
+
+impl LogEntry {
+    fn get_timestamp(&self) -> String {
+        match &self.timestamp {
+            Some(t) => t.clone(),
+            None => String::from("Unspecified Time"),
+        }
+    }
+
+    pub fn generate(&self) -> String {
+        format!("{} : {}", self.get_timestamp(), &self.message)
+    }
+}

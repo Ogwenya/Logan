@@ -1,8 +1,8 @@
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout},
+    style::{Color, Style},
     widgets::{Block, Borders, List, ListItem, Paragraph},
-    style::{Style, Color},
 };
 
 use crate::app::{App, InputMode};
@@ -24,8 +24,12 @@ pub fn draw(frame: &mut Frame, app: &App) {
         InputMode::Editing => "Search (Press 'Esc' or 'Enter' to stop editing)",
     };
 
-    let search_block = Paragraph::new(app.search_query.clone())
-        .block(Block::default().title(search_title).borders(Borders::ALL).style(search_style));
+    let search_block = Paragraph::new(app.search_query.clone()).block(
+        Block::default()
+            .title(search_title)
+            .borders(Borders::ALL)
+            .style(search_style),
+    );
     frame.render_widget(search_block, parent_chunks[0]);
 
     let chunks = Layout::default()
@@ -34,7 +38,11 @@ pub fn draw(frame: &mut Frame, app: &App) {
         .split(parent_chunks[1]);
 
     let mut sidebar_items = vec![];
-    let reset_text = if app.filter.is_none() { ">> Reset <<" } else { "Reset" };
+    let reset_text = if app.filter.is_none() {
+        ">> Reset <<"
+    } else {
+        "Reset"
+    };
     sidebar_items.push(ListItem::new(reset_text));
 
     for level in LogLevel::ALL {
@@ -47,18 +55,19 @@ pub fn draw(frame: &mut Frame, app: &App) {
         sidebar_items.push(item);
     }
 
-    let sidebar = List::new(sidebar_items)
-        .block(Block::default().title("Levels").borders(Borders::ALL));
-    
+    let sidebar =
+        List::new(sidebar_items).block(Block::default().title("Levels").borders(Borders::ALL));
+
     frame.render_widget(sidebar, chunks[0]);
 
     let filtered_logs = app.filtered_logs();
     let log_items: Vec<ListItem> = filtered_logs
         .iter()
-        .map(|log| ListItem::new(log.message.clone()))
+        .map(|log| ListItem::new(log.generate()))
         .collect();
 
-    let logs_list = List::new(log_items).block(Block::default().title("Logs").borders(Borders::ALL));
+    let logs_list =
+        List::new(log_items).block(Block::default().title("Logs").borders(Borders::ALL));
 
     frame.render_widget(logs_list, chunks[1]);
 }
