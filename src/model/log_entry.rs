@@ -10,6 +10,17 @@ pub enum LogLevel {
     Unknown,
 }
 
+impl LogLevel {
+    pub const ALL: [LogLevel; 6] = [
+        LogLevel::Trace,
+        LogLevel::Debug,
+        LogLevel::Info,
+        LogLevel::Warn,
+        LogLevel::Error,
+        LogLevel::Unknown,
+    ];
+}
+
 #[derive(Debug, Clone)]
 pub struct LogEntry {
     #[allow(dead_code)]

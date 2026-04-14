@@ -67,6 +67,18 @@ fn run() -> Result<(), io::Error> {
             events::AppEvent::Quit => break,
             events::AppEvent::Down => app.next(),
             events::AppEvent::Up => app.previous(),
+            events::AppEvent::Click(col, row) => {
+                if col < 20 {
+                    if row == 1 {
+                        app.set_filter(None);
+                    } else if row >= 2 {
+                        let idx = row as usize - 2;
+                        if idx < crate::model::log_entry::LogLevel::ALL.len() {
+                            app.set_filter(Some(crate::model::log_entry::LogLevel::ALL[idx].clone()));
+                        }
+                    }
+                }
+            }
             _ => {}
         }
     }
