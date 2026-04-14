@@ -11,7 +11,14 @@ Logan is an intuitive, fast, and elegant Terminal User Interface (TUI) applicati
 
 ## 📦 Installation
 
-download the latest release from the [release page](https://github.com/Ogwenya/Logan/releases)
+### Quick install (Unix/Linux)
+Install the latest version automatically using our script. It detects your operating system, downloads the correct binary from our Releases, and installs it securely.
+
+```shell
+curl -fsSL https://raw.githubusercontent.com/Ogwenya/Logan/main/install.sh | sh
+```
+
+*(Alternatively, you can manually download the latest release from the [release page](https://github.com/Ogwenya/Logan/releases) or build it with `cargo`)*
 
 ## 🛠 Usage
 
