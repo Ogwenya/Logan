@@ -64,15 +64,48 @@ fn run() -> Result<(), io::Error> {
         terminal.draw(|f| ui::draw(f, &app))?;
 
         match events::read_event() {
-            events::AppEvent::Quit => break,
-            events::AppEvent::Down => app.next(),
-            events::AppEvent::Up => app.previous(),
+            events::AppEvent::Char(c) => {
+                match app.input_mode {
+                    app::InputMode::Normal => {
+                        if c == 'q' {
+                            break;
+                        } else if c == '/' {
+                            app.input_mode = app::InputMode::Editing;
+                        }
+                    }
+                    app::InputMode::Editing => {
+                        app.search_query.push(c);
+                        app.selected = 0;
+                    }
+                }
+            }
+            events::AppEvent::Backspace => {
+                if let app::InputMode::Editing = app.input_mode {
+                    app.search_query.pop();
+                    app.selected = 0;
+                }
+            }
+            events::AppEvent::Enter | events::AppEvent::Esc => {
+                app.input_mode = app::InputMode::Normal;
+            }
+            events::AppEvent::Down => {
+                if let app::InputMode::Normal = app.input_mode {
+                    app.next();
+                }
+            }
+            events::AppEvent::Up => {
+                if let app::InputMode::Normal = app.input_mode {
+                    app.previous();
+                }
+            }
             events::AppEvent::Click(col, row) => {
-                if col < 20 {
-                    if row == 1 {
+                // Adjust row click for layout shift (top search bar takes 3 units)
+                if row >= 3 && col < 20 {
+                    let adjusted_row = row - 3;
+                    if adjusted_row == 1 {
                         app.set_filter(None);
-                    } else if row >= 2 {
-                        let idx = row as usize - 2;
+                    } else if adjusted_row >= 2 {
+                        let idx = adjusted_row as usize - 2;
                         if idx < crate::model::log_entry::LogLevel::ALL.len() {
                             app.set_filter(Some(crate::model::log_entry::LogLevel::ALL[idx].clone()));
                         }

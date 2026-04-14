@@ -1,9 +1,16 @@
 use crate::model::log_entry::{LogEntry, LogLevel};
 
+pub enum InputMode {
+    Normal,
+    Editing,
+}
+
 pub struct App {
     pub logs: Vec<LogEntry>,
     pub selected: usize,
     pub filter: Option<LogLevel>,
+    pub search_query: String,
+    pub input_mode: InputMode,
 }
 
 impl App {
@@ -12,6 +19,8 @@ impl App {
             logs: Vec::new(),
             selected: 0,
             filter: None,
+            search_query: String::new(),
+            input_mode: InputMode::Normal,
         }
     }
 
@@ -22,11 +31,19 @@ impl App {
 
     pub fn filtered_logs(&self) -> Vec<&LogEntry> {
         self.logs.iter().filter(|log| {
-            if let Some(f) = &self.filter {
+            let level_match = if let Some(f) = &self.filter {
                 log.level.as_ref() == Some(f)
             } else {
                 true
-            }
+            };
+
+            let search_match = if self.search_query.is_empty() {
+                true
+            } else {
+                log.message.to_lowercase().contains(&self.search_query.to_lowercase())
+            };
+
+            level_match && search_match
         }).collect()
     }
 

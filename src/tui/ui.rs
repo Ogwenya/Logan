@@ -1,17 +1,37 @@
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout},
-    widgets::{Block, Borders, List, ListItem},
+    widgets::{Block, Borders, List, ListItem, Paragraph},
+    style::{Style, Color},
 };
 
-use crate::app::App;
+use crate::app::{App, InputMode};
 use crate::model::log_entry::LogLevel;
 
 pub fn draw(frame: &mut Frame, app: &App) {
+    let parent_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(3), Constraint::Min(0)])
+        .split(frame.area());
+
+    let search_style = match app.input_mode {
+        InputMode::Normal => Style::default(),
+        InputMode::Editing => Style::default().fg(Color::Yellow),
+    };
+
+    let search_title = match app.input_mode {
+        InputMode::Normal => "Search (Press '/' to search, 'q' to quit)",
+        InputMode::Editing => "Search (Press 'Esc' or 'Enter' to stop editing)",
+    };
+
+    let search_block = Paragraph::new(app.search_query.clone())
+        .block(Block::default().title(search_title).borders(Borders::ALL).style(search_style));
+    frame.render_widget(search_block, parent_chunks[0]);
+
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Length(20), Constraint::Min(0)])
-        .split(frame.area());
+        .split(parent_chunks[1]);
 
     let mut sidebar_items = vec![];
     let reset_text = if app.filter.is_none() { ">> Reset <<" } else { "Reset" };
