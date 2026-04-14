@@ -6,25 +6,25 @@ VERSION="${1:-latest}"
 INSTALL_DIR="${LOGAN_INSTALL:-/usr/local/bin}"
 
 detect_platform() {
-    local os arch
+    local os arch target
 
     os=$(uname -s | tr '[:upper:]' '[:lower:]')
-    case "$os" in
-        linux*) os="linux" ;;
-        darwin*) os="darwin" ;;
-        mingw*|msys*|cygwin*) os="windows" ;;
-        *) echo "Error: Unsupported OS: $os" >&2; exit 1 ;;
-    esac
-
     arch=$(uname -m)
+
     case "$arch" in
         x86_64|amd64) arch="x86_64" ;;
         aarch64|arm64) arch="aarch64" ;;
-        armv7l|armv6l) arch="arm" ;;
         *) echo "Error: Unsupported architecture: $arch" >&2; exit 1 ;;
     esac
 
-    echo "${os}-${arch}"
+    case "$os" in
+        linux*) target="${arch}-unknown-linux-gnu" ;;
+        darwin*) target="${arch}-apple-darwin" ;;
+        mingw*|msys*|cygwin*) target="${arch}-pc-windows-msvc" ;;
+        *) echo "Error: Unsupported OS: $os" >&2; exit 1 ;;
+    esac
+
+    echo "$target"
 }
 
 get_release_data() {
@@ -109,8 +109,8 @@ install_logan() {
 
     local ext
     case "$platform" in
-        windows-*) ext="zip" ;;
-        *) ext="tar.gz" ;;
+        *windows*) ext="zip" ;;
+        *) ext="tar.xz" ;;
     esac
 
     local filename="logan-${platform}.${ext}"
@@ -188,8 +188,8 @@ install_logan() {
 
     echo "Extracting..."
     case "$ext" in
-        tar.gz)
-            tar -xzf "$filename" || {
+        tar.xz)
+            tar -xf "$filename" || {
                 echo "Error: Extraction failed" >&2
                 rm -rf "$tmp_dir"
                 exit 1
