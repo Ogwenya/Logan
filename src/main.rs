@@ -8,7 +8,7 @@ use crossterm::{
 };
 use ratatui::{Terminal, backend::CrosstermBackend};
 
-use std::io;
+use std::{env, io, path::Path};
 
 use app::App;
 use parser::{LogParser, json_parser::JsonParser, text_parser::TextParser};
@@ -23,7 +23,16 @@ mod parser;
 mod source;
 mod tui;
 
-fn main() -> Result<(), io::Error> {
+fn main() {
+    if let Err(err) = run() {
+        eprintln!("{}", err);
+        std::process::exit(1);
+    }
+}
+
+fn run() -> Result<(), io::Error> {
+    let mut source = open_file(env::args())?;
+
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     let _ = execute!(
@@ -37,8 +46,6 @@ fn main() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
 
     let mut app = App::new();
-
-    let mut source = FileSource::new("example.log");
 
     let json_parser = JsonParser;
     let text_parser = TextParser;
@@ -73,4 +80,27 @@ fn main() -> Result<(), io::Error> {
     terminal.show_cursor()?;
 
     Ok(())
+}
+
+fn open_file(mut args: impl Iterator<Item = String>) -> Result<FileSource, io::Error> {
+    args.next();
+
+    match args.next() {
+        Some(arg) => {
+            let is_file = Path::new(&arg).is_file();
+
+            if is_file {
+                Ok(FileSource::new(&arg))
+            } else {
+                Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "The provided path is not a valid file path",
+                ))
+            }
+        }
+        None => Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Provide a file path",
+        )),
+    }
 }
