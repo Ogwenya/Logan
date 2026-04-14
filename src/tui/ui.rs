@@ -2,6 +2,7 @@ use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout},
     style::{Color, Style},
+    text::{Line, Span},
     widgets::{Block, Borders, List, ListItem, Paragraph},
 };
 
@@ -47,10 +48,11 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
     for level in LogLevel::ALL {
         let text = format!("{:?}", level);
+        let color = level.color();
         let item = if app.filter.as_ref() == Some(&level) {
-            ListItem::new(format!(">> {} <<", text))
+            ListItem::new(format!(">> {} <<", text)).style(Style::default().fg(color))
         } else {
-            ListItem::new(text)
+            ListItem::new(text).style(Style::default().fg(color))
         };
         sidebar_items.push(item);
     }
@@ -63,7 +65,19 @@ pub fn draw(frame: &mut Frame, app: &App) {
     let filtered_logs = app.filtered_logs();
     let log_items: Vec<ListItem> = filtered_logs
         .iter()
-        .map(|log| ListItem::new(log.generate()))
+        .map(|log| {
+            let timestamp_span = Span::styled(
+                format!("{} : ", log.get_timestamp()),
+                Style::default().fg(Color::DarkGray),
+            );
+            
+            let message_span = Span::styled(
+                log.message.clone(),
+                Style::default().fg(Color::White),
+            );
+
+            ListItem::new(Line::from(vec![timestamp_span, message_span]))
+        })
         .collect();
 
     let logs_list =

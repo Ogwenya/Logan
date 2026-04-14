@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use ratatui::style::Color;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LogLevel {
@@ -19,6 +20,17 @@ impl LogLevel {
         LogLevel::Error,
         LogLevel::Unknown,
     ];
+
+    pub fn color(&self) -> Color {
+        match self {
+            LogLevel::Error => Color::Red,
+            LogLevel::Warn => Color::Yellow,
+            LogLevel::Info => Color::Green,
+            LogLevel::Debug => Color::Blue,
+            LogLevel::Trace => Color::DarkGray,
+            LogLevel::Unknown => Color::Gray,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -35,14 +47,10 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    fn get_timestamp(&self) -> String {
+    pub fn get_timestamp(&self) -> String {
         match &self.timestamp {
             Some(t) => t.clone(),
             None => String::from("Unspecified Time"),
         }
-    }
-
-    pub fn generate(&self) -> String {
-        format!("{} : {}", self.get_timestamp(), &self.message)
     }
 }
