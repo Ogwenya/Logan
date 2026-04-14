@@ -210,6 +210,13 @@ install_logan() {
             ;;
     esac
 
+    # cargo-dist generally extracts into a directory matching the archive's base name
+    local extract_dir="logan-${platform}"
+    
+    if [ -d "$extract_dir" ]; then
+        cd "$extract_dir"
+    fi
+
     if [ -f "logan" ] || [ -f "logan.exe" ]; then
         local binary_name="logan"
         [ -f "logan.exe" ] && binary_name="logan.exe"
