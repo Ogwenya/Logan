@@ -66,15 +66,14 @@ pub fn draw(frame: &mut Frame, app: &App) {
     let log_items: Vec<ListItem> = filtered_logs
         .iter()
         .map(|log| {
-            let timestamp_span = Span::styled(
-                format!("{} : ", log.get_timestamp()),
-                Style::default().fg(Color::DarkGray),
-            );
-            
-            let message_span = Span::styled(
-                log.message.clone(),
-                Style::default().fg(Color::White),
-            );
+            let timestamp_text = if log.get_timestamp().len() > 0 {
+                format!("{} : ", log.get_timestamp())
+            } else {
+                log.get_timestamp()
+            };
+            let timestamp_span = Span::styled(timestamp_text, Style::default().fg(Color::DarkGray));
+
+            let message_span = Span::styled(log.message.clone(), Style::default().fg(Color::White));
 
             ListItem::new(Line::from(vec![timestamp_span, message_span]))
         })

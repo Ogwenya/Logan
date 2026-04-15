@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use ratatui::style::Color;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LogLevel {
@@ -50,7 +50,7 @@ impl LogEntry {
     pub fn get_timestamp(&self) -> String {
         match &self.timestamp {
             Some(t) => t.clone(),
-            None => String::from("Unspecified Time"),
+            None => String::new(),
         }
     }
 }
